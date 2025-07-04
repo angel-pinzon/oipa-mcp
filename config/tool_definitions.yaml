@@ -1,0 +1,96 @@
+# OIPA MCP Server Tool Definitions
+# Centralized configuration for all available tools
+
+tools:
+  policy_management:
+    - name: oipa_search_policies
+      category: search
+      priority: high
+      description: "Search insurance policies using natural language"
+      examples:
+        - "Find policies for María García"
+        - "Search VG01-002-561-000001063"
+        - "Show active policies for ACME Corp"
+      
+    - name: oipa_get_policy_details
+      category: details
+      priority: high  
+      description: "Get comprehensive policy information"
+      examples:
+        - "Get details for policy VG01-002-561-000001063"
+        - "Show policy information for GUID 6CCA0B15-EFAC-471F-A698-27949AB9B9C4"
+      
+    - name: oipa_policy_counts_by_status
+      category: analytics
+      priority: medium
+      description: "Get policy distribution by status"
+      examples:
+        - "How many policies do we have?"
+        - "Show policy counts by status"
+        - "Policy dashboard overview"
+
+  client_management:
+    - name: oipa_search_clients
+      category: search
+      priority: high
+      description: "Search clients by name or tax ID"
+      examples:
+        - "Find client María García Rodríguez"
+        - "Search tax ID GARM850101ABC"
+      
+    - name: oipa_client_portfolio
+      category: portfolio
+      priority: medium
+      description: "Get all policies for a client"
+      examples:
+        - "Show all policies for client GUID 12345"
+        - "Client portfolio for María García"
+
+  analytics:
+    - name: oipa_premium_summary
+      category: financial
+      priority: medium
+      description: "Premium analytics and summaries"
+      examples:
+        - "Premium totals by product"
+        - "Monthly premium analysis"
+      
+    - name: oipa_expiring_policies
+      category: operational
+      priority: high
+      description: "Policies expiring soon"
+      examples:
+        - "Policies expiring in next 30 days"
+        - "Renewal pipeline"
+
+# Tool Categories
+categories:
+  search:
+    icon: "🔍"
+    description: "Find and locate records"
+    
+  details:
+    icon: "📋"
+    description: "Detailed information views"
+    
+  analytics:
+    icon: "📊"
+    description: "Business intelligence and reporting"
+    
+  portfolio:
+    icon: "💼"
+    description: "Client portfolio management"
+    
+  financial:
+    icon: "💰"
+    description: "Financial analysis and reporting"
+    
+  operational:
+    icon: "⚙️"
+    description: "Operational tools and workflows"
+
+# Priority Levels
+priorities:
+  high: "Core business functionality"
+  medium: "Important but secondary"
+  low: "Nice to have features"

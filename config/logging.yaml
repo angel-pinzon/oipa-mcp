@@ -1,0 +1,42 @@
+"""
+Logging configuration for OIPA MCP Server
+"""
+
+version: 1
+disable_existing_loggers: false
+
+formatters:
+  standard:
+    format: "{time:YYYY-MM-DD HH:mm:ss.SSS} | {level: <8} | {name}:{function}:{line} | {message}"
+  json:
+    format: "{\"timestamp\": \"{time}\", \"level\": \"{level}\", \"logger\": \"{name}\", \"function\": \"{function}\", \"line\": {line}, \"message\": \"{message}\"}"
+
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: INFO
+    formatter: standard
+    stream: ext://sys.stdout
+  
+  file:
+    class: logging.handlers.RotatingFileHandler
+    level: DEBUG
+    formatter: json
+    filename: logs/oipa-mcp.log
+    maxBytes: 10485760  # 10MB
+    backupCount: 5
+
+loggers:
+  oipa_mcp:
+    level: DEBUG
+    handlers: [console, file]
+    propagate: false
+  
+  oracledb:
+    level: WARNING
+    handlers: [console, file]
+    propagate: false
+
+root:
+  level: INFO
+  handlers: [console]

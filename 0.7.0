@@ -1,0 +1,19 @@
+Collecting cx-oracle
+  Downloading cx_Oracle-8.3.0.tar.gz (363 kB)
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Getting requirements to build wheel: started
+  Getting requirements to build wheel: finished with status 'done'
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'done'
+Collecting loguru
+  Downloading loguru-0.7.3-py3-none-any.whl.metadata (22 kB)
+Requirement already satisfied: colorama>=0.3.4 in c:\users\spinzon\appdata\local\anaconda3\lib\site-packages (from loguru) (0.4.6)
+Collecting win32-setctime>=1.0.0 (from loguru)
+  Downloading win32_setctime-1.2.0-py3-none-any.whl.metadata (2.4 kB)
+Downloading loguru-0.7.3-py3-none-any.whl (61 kB)
+Downloading win32_setctime-1.2.0-py3-none-any.whl (4.1 kB)
+Building wheels for collected packages: cx-oracle
+  Building wheel for cx-oracle (pyproject.toml): started
+  Building wheel for cx-oracle (pyproject.toml): finished with status 'error'
+Failed to build cx-oracle

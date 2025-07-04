@@ -1,0 +1,31 @@
+# Core MCP and async dependencies
+mcp>=1.0.0
+pydantic>=2.0.0
+aiohttp>=3.8.0
+
+# Oracle Database connectivity (modern, no Oracle Client required)
+oracledb>=2.0.0
+
+# XML processing (for AsXML and SOAP)
+lxml>=4.9.0
+
+# Configuration and environment
+python-dotenv>=1.0.0
+pyyaml>=6.0
+
+# Logging
+loguru>=0.7.0
+
+# Template engine (for building XML/SOAP messages)
+jinja2>=3.1.0
+
+# Optional: MQTT support for async messaging
+asyncio-mqtt>=0.11.0
+
+# Development dependencies (optional)
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
+pytest-mock>=3.10.0
+black>=23.0.0
+ruff>=0.1.0
+mypy>=1.5.0

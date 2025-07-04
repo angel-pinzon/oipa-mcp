@@ -1,0 +1,4 @@
+Requirement already satisfied: oracledb in c:\users\spinzon\appdata\local\anaconda3\lib\site-packages (3.2.0)
+Requirement already satisfied: cryptography>=3.2.1 in c:\users\spinzon\appdata\local\anaconda3\lib\site-packages (from oracledb) (43.0.0)
+Requirement already satisfied: cffi>=1.12 in c:\users\spinzon\appdata\local\anaconda3\lib\site-packages (from cryptography>=3.2.1->oracledb) (1.17.1)
+Requirement already satisfied: pycparser in c:\users\spinzon\appdata\local\anaconda3\lib\site-packages (from cffi>=1.12->cryptography>=3.2.1->oracledb) (2.21)
