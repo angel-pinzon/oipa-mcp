@@ -298,3 +298,40 @@ Help: https://docs.oracle.com/error-help/db/ora-00942/
 2025-07-04 18:27:48.476 | DEBUG    | oipa_mcp.connectors.database:get_connection:168 | Set default schema to: OIPA_PREPROD_1
 2025-07-04 18:27:53.046 | DEBUG    | oipa_mcp.connectors.database:execute_query:224 | Query executed successfully, returned 3 rows
 2025-07-04 18:27:55.012 | DEBUG    | oipa_mcp.connectors.database:get_connection:168 | Set default schema to: OIPA_PREPROD_1
+2025-07-04 19:11:29.081 | INFO     | oipa_mcp.server:_setup_logging:67 | OIPA MCP Server starting - version 1.0.0
+2025-07-04 19:12:39.739 | INFO     | oipa_mcp.server:_setup_logging:67 | OIPA MCP Server starting - version 1.0.0
+2025-07-04 19:12:39.742 | INFO     | oipa_mcp.connectors.database:_initialize_traditional:119 | Initializing traditional Oracle connection
+2025-07-04 19:12:39.745 | INFO     | oipa_mcp.connectors.database:_initialize_traditional:126 | Using thin mode (pure Python, no Oracle Client required)
+2025-07-04 19:12:39.745 | INFO     | oipa_mcp.connectors.database:initialize:49 | Async database pool initialized: 115.2.23.106:1530/oipa.data.equpvcnprdhub01.oraclevcn.com
+2025-07-04 19:12:39.746 | INFO     | oipa_mcp.connectors.database:initialize:50 | Pool configuration: min=1, max=5
+2025-07-04 19:12:39.746 | INFO     | oipa_mcp.tools.policy_tools:_execute_impl:77 | Searching policies: term='VG01', status='all', limit=3
+2025-07-04 19:12:40.997 | DEBUG    | oipa_mcp.connectors.database:get_connection:168 | Set default schema to: OIPA_PREPROD_1
+2025-07-04 19:12:41.118 | DEBUG    | oipa_mcp.connectors.database:execute_query:224 | Query executed successfully, returned 1 rows
+2025-07-04 19:12:41.118 | INFO     | oipa_mcp.connectors.database:test_connection:299 | Database connection test successful (response time: 1360.00ms)
+2025-07-04 19:12:41.241 | DEBUG    | oipa_mcp.connectors.database:get_connection:168 | Set default schema to: OIPA_PREPROD_1
+2025-07-04 19:12:57.839 | DEBUG    | oipa_mcp.connectors.database:execute_query:224 | Query executed successfully, returned 3 rows
+2025-07-04 19:12:57.844 | INFO     | oipa_mcp.tools.policy_tools:_execute_impl:201 | Getting policy details: guid=None, number=VG01-886-10255-18002-29004-1-1
+2025-07-04 19:12:57.965 | DEBUG    | oipa_mcp.connectors.database:get_connection:168 | Set default schema to: OIPA_PREPROD_1
+2025-07-04 19:12:58.085 | DEBUG    | oipa_mcp.connectors.database:execute_query:224 | Query executed successfully, returned 1 rows
+2025-07-04 19:12:58.085 | INFO     | oipa_mcp.connectors.database:test_connection:299 | Database connection test successful (response time: 235.00ms)
+2025-07-04 19:12:58.207 | DEBUG    | oipa_mcp.connectors.database:get_connection:168 | Set default schema to: OIPA_PREPROD_1
+2025-07-04 19:12:58.454 | DEBUG    | oipa_mcp.connectors.database:execute_query:224 | Query executed successfully, returned 1 rows
+2025-07-04 19:12:58.574 | DEBUG    | oipa_mcp.connectors.database:get_connection:168 | Set default schema to: OIPA_PREPROD_1
+2025-07-04 19:12:58.694 | DEBUG    | oipa_mcp.connectors.database:execute_query:224 | Query executed successfully, returned 1 rows
+2025-07-04 19:12:58.694 | INFO     | oipa_mcp.connectors.database:test_connection:299 | Database connection test successful (response time: 234.00ms)
+2025-07-04 19:12:58.816 | DEBUG    | oipa_mcp.connectors.database:get_connection:168 | Set default schema to: OIPA_PREPROD_1
+2025-07-04 19:12:59.068 | DEBUG    | oipa_mcp.connectors.database:execute_query:224 | Query executed successfully, returned 3 rows
+2025-07-04 19:12:59.109 | INFO     | oipa_mcp.tools.policy_tools:_execute_impl:374 | Getting policy counts by status
+2025-07-04 19:12:59.229 | DEBUG    | oipa_mcp.connectors.database:get_connection:168 | Set default schema to: OIPA_PREPROD_1
+2025-07-04 19:12:59.354 | DEBUG    | oipa_mcp.connectors.database:execute_query:224 | Query executed successfully, returned 1 rows
+2025-07-04 19:12:59.354 | INFO     | oipa_mcp.connectors.database:test_connection:299 | Database connection test successful (response time: 250.00ms)
+2025-07-04 19:12:59.500 | DEBUG    | oipa_mcp.connectors.database:get_connection:168 | Set default schema to: OIPA_PREPROD_1
+2025-07-04 19:13:06.084 | DEBUG    | oipa_mcp.connectors.database:execute_query:224 | Query executed successfully, returned 14 rows
+2025-07-04 19:13:06.242 | INFO     | oipa_mcp.connectors.database:close:149 | Database pool closed
+2025-07-04 19:13:06.252 | INFO     | oipa_mcp.connectors.database:_initialize_traditional:119 | Initializing traditional Oracle connection
+2025-07-04 19:13:06.253 | INFO     | oipa_mcp.connectors.database:_initialize_traditional:126 | Using thin mode (pure Python, no Oracle Client required)
+2025-07-04 19:13:06.255 | INFO     | oipa_mcp.connectors.database:initialize:49 | Async database pool initialized: 115.2.23.106:1530/oipa.data.equpvcnprdhub01.oraclevcn.com
+2025-07-04 19:13:06.261 | INFO     | oipa_mcp.connectors.database:initialize:50 | Pool configuration: min=1, max=5
+2025-07-04 19:13:07.500 | DEBUG    | oipa_mcp.connectors.database:get_connection:168 | Set default schema to: OIPA_PREPROD_1
+2025-07-04 19:13:10.114 | DEBUG    | oipa_mcp.connectors.database:execute_query:224 | Query executed successfully, returned 14 rows
+2025-07-04 19:13:10.239 | INFO     | oipa_mcp.connectors.database:close:149 | Database pool closed

@@ -88,11 +88,14 @@ class SearchPoliciesQuality(QueryTool):
         # Enhance results with additional formatting
         enhanced_results = []
         for policy in results:
+            # Use database-provided status name if available, otherwise format the code
+            status_display = policy.get("status_name") or self._format_status(policy["status_code"])
+            
             enhanced_policy = {
                 "policy_guid": policy["policy_guid"],
                 "policy_number": policy["policy_number"],
                 "policy_name": policy["policy_name"],
-                "status": self._format_status(policy["status_code"]),
+                "status": status_display,
                 "status_code": policy["status_code"],
                 "plan_date": policy["plan_date"].strftime("%Y-%m-%d") if policy["plan_date"] else None,
                 "updated_date": policy["updated_date"].strftime("%Y-%m-%d %H:%M:%S") if policy["updated_date"] else None,
@@ -148,12 +151,13 @@ class GetPolicyDetailsTotal(QueryTool):
         Get comprehensive details for a specific insurance policy.
         
         Includes:
-        - Basic policy information
-        - Client/insured details
-        - Plan information
-        - Policy status and dates
+        - Basic policy information (number, name, status, dates)
+        - Primary client/insured details (name, tax ID, demographics)
+        - Plan information (name, GUID)
+        - All policy roles with detailed client information
+        - Role types (Primary Insured, Policy Owner, Beneficiary, etc.)
+        - Client details for each role (name, contact info, demographics)
         - Related segments (if requested)
-        - Role assignments (if requested)
         
         Can search by policy GUID or policy number.
         """
@@ -209,15 +213,23 @@ class GetPolicyDetailsTotal(QueryTool):
             return self._build_error_response("Policy not found")
         
         # Format basic policy information
+        # Use database-provided names if available, otherwise format the codes
+        status_display = policy_data.get("status_name") or self._format_status(policy_data["status_code"])
+        state_display = policy_data.get("issue_state_name") or policy_data.get("issue_state_code", "Unknown")
+        
+        # Format basic policy information
         result = {
             "policy": {
                 "guid": policy_data["policy_guid"],
                 "number": policy_data["policy_number"],
                 "name": policy_data["policy_name"],
-                "status": self._format_status(policy_data["status_code"]),
+                "status": status_display,
                 "status_code": policy_data["status_code"],
+                "status_description": policy_data.get("status_description"),
                 "plan_date": policy_data["plan_date"].strftime("%Y-%m-%d") if policy_data["plan_date"] else None,
-                "issue_state": policy_data["issue_state"],
+                "issue_state": state_display,
+                "issue_state_code": policy_data.get("issue_state_code"),
+                "issue_state_description": policy_data.get("issue_state_description"),
                 "creation_date": policy_data["creation_date"].strftime("%Y-%m-%d") if policy_data["creation_date"] else None,
                 "updated_date": policy_data["updated_date"].strftime("%Y-%m-%d %H:%M:%S") if policy_data["updated_date"] else None
             },
@@ -241,9 +253,8 @@ class GetPolicyDetailsTotal(QueryTool):
         if include_segments:
             result["segments"] = await self._get_policy_segments(policy_data["policy_guid"])
         
-        # Add roles if requested  
-        if include_roles:
-            result["roles"] = await self._get_policy_roles(policy_data["policy_guid"])
+        # Always include roles with detailed information
+        result["roles"] = await self._get_policy_roles(policy_data["policy_guid"])
         
         return self._build_success_response(result)
     
@@ -254,39 +265,60 @@ class GetPolicyDetailsTotal(QueryTool):
         return []
     
     async def _get_policy_roles(self, policy_guid: str) -> List[Dict[str, Any]]:
-        """Get all roles for a policy"""
+        """Get all roles for a policy with detailed client and role information"""
         query = """
             SELECT 
                 r.RoleGUID as role_guid,
                 r.RoleCode as role_code,
                 r.RolePercent as role_percent,
                 r.RoleAmount as role_amount,
+                r.StatusCode as role_status_code,
+                role_code_tbl.ShortDescription as role_type_name,
+                role_code_tbl.LongDescription as role_type_description,
                 c.ClientGUID as client_guid,
                 c.FirstName as first_name,
                 c.LastName as last_name,
                 c.CompanyName as company_name,
-                c.TaxID as tax_id
+                c.TaxID as tax_id,
+                c.TypeCode as client_type_code,
+                c.DateOfBirth as date_of_birth,
+                c.Sex as gender,
+                c.Email as email
             FROM AsRole r
             LEFT JOIN AsClient c ON r.ClientGUID = c.ClientGUID
+            LEFT JOIN AsCode role_code_tbl ON role_code_tbl.CodeValue = r.RoleCode 
+                AND role_code_tbl.CodeName = 'AsCodeRole'
             WHERE r.PolicyGUID = :policy_guid
             ORDER BY r.RoleCode
         """
         
         roles_data = await self._execute_query_tool(query, {"policy_guid": policy_guid})
         
-        # Format roles
+        # Format roles with enhanced information
         formatted_roles = []
         for role in roles_data:
+            # Use database-provided role type name if available, otherwise use fallback mapping
+            role_type_display = role.get("role_type_name") or self._format_role_type(role["role_code"])
+            
             formatted_role = {
                 "role_guid": role["role_guid"],
                 "role_code": role["role_code"],
-                "role_type": self._format_role_type(role["role_code"]),
-                "percent": role["role_percent"],
-                "amount": role["role_amount"],
+                "role_type": role_type_display,
+                "role_type_description": role.get("role_type_description"),
+                "role_status_code": role["role_status_code"],
+                "percent": float(role["role_percent"]) if role["role_percent"] else None,
+                "amount": float(role["role_amount"]) if role["role_amount"] else None,
                 "client": {
                     "guid": role["client_guid"],
                     "name": self._format_client_name(role),
-                    "tax_id": role["tax_id"]
+                    "first_name": role["first_name"],
+                    "last_name": role["last_name"],
+                    "company_name": role["company_name"],
+                    "tax_id": role["tax_id"],
+                    "client_type_code": role["client_type_code"],
+                    "date_of_birth": role["date_of_birth"].strftime("%Y-%m-%d") if role["date_of_birth"] else None,
+                    "gender": role["gender"],
+                    "email": role["email"]
                 }
             }
             formatted_roles.append(formatted_role)
@@ -305,14 +337,48 @@ class GetPolicyDetailsTotal(QueryTool):
         return status_map.get(status_code, f"Unknown ({status_code})")
     
     def _format_role_type(self, role_code: str) -> str:
-        """Convert role code to human-readable format"""
+        """Convert role code to human-readable format based on OIPA AsCodeRole table"""
         role_map = {
             "01": "Primary Insured",
             "02": "Secondary Insured", 
+            "03": "Tertiary Insured",
+            "04": "Payor",
             "05": "Insured",
+            "06": "Co-Insured",
+            "07": "Joint Insured",
+            "08": "Contingent Owner",
+            "09": "Successor Owner",
+            "10": "Trustee",
+            "11": "Producer",
+            "12": "Agent",
             "13": "Policy Owner",
+            "14": "Producer Payee",
+            "15": "Broker",
+            "16": "Case Manager",
+            "17": "Servicing Agent",
+            "18": "Billing Contact",
+            "19": "Alternative Payor",
+            "20": "Contingent Payor",
+            "21": "Premium Payor",
+            "22": "Other",
+            "23": "Power of Attorney",
+            "24": "Guardian",
+            "25": "Conservator",
+            "26": "Primary Beneficiary",
             "27": "Annuitant",
-            "34": "Beneficiary"
+            "28": "Joint Annuitant",
+            "29": "Contingent Annuitant",
+            "30": "Successor Annuitant",
+            "31": "Beneficiary Payee",
+            "32": "Contingent Beneficiary",
+            "33": "Tertiary Beneficiary",
+            "34": "Beneficiary",
+            "35": "Estate Beneficiary",
+            "36": "Trust Beneficiary",
+            "37": "Corporation",
+            "38": "Partnership",
+            "39": "Charity",
+            "40": "Other Entity"
         }
         return role_map.get(role_code, f"Role {role_code}")
     
@@ -372,7 +438,8 @@ class PolicyCountsByStatusSmall(QueryTool):
         for row in results:
             status_code = row["status_code"]
             count = row["policy_count"]
-            status_name = self._format_status(status_code)
+            # Use database-provided status name if available, otherwise format the code
+            status_name = row.get("status_name") or self._format_status(status_code)
             
             formatted_counts[status_name] = {
                 "count": count,

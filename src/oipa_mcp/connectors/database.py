@@ -366,6 +366,7 @@ class OipaQueryBuilder:
                 p.PolicyNumber as policy_number,
                 p.PolicyName as policy_name,
                 p.StatusCode as status_code,
+                status_code_tbl.ShortDescription as status_name,
                 p.PlanDate as plan_date,
                 p.UpdatedGmt as updated_date,
                 c.ClientGUID as client_guid,
@@ -374,6 +375,9 @@ class OipaQueryBuilder:
                 c.CompanyName as company_name,
                 c.TaxID as tax_id
             FROM {OipaQueryBuilder.POLICY_TABLES}
+            -- Join with AsCode table for status description
+            LEFT JOIN AsCode status_code_tbl ON status_code_tbl.CodeValue = p.StatusCode 
+                AND status_code_tbl.CodeName = 'AsCodeStatus'
         """
         
         conditions = []
@@ -417,7 +421,6 @@ class OipaQueryBuilder:
         """
         
         return query, parameters
-    
     @staticmethod
     def get_policy_details(
         policy_guid: Optional[str] = None,
@@ -425,7 +428,7 @@ class OipaQueryBuilder:
         include_segments: bool = False
     ) -> tuple[str, Dict[str, Any]]:
         """
-        Build query to get detailed policy information
+        Build query to get detailed policy information including status and state names
         """
         if not policy_guid and not policy_number:
             raise ValueError("Either policy_guid or policy_number must be provided")
@@ -436,8 +439,12 @@ class OipaQueryBuilder:
                 p.PolicyNumber as policy_number,
                 p.PolicyName as policy_name,
                 p.StatusCode as status_code,
+                status_code_tbl.ShortDescription as status_name,
+                status_code_tbl.LongDescription as status_description,
                 p.PlanDate as plan_date,
-                p.IssueStateCode as issue_state,
+                p.IssueStateCode as issue_state_code,
+                state_code_tbl.ShortDescription as issue_state_name,
+                state_code_tbl.LongDescription as issue_state_description,
                 p.CreationDate as creation_date,
                 p.UpdatedGmt as updated_date,
                 -- Client information (primary insured)
@@ -452,6 +459,12 @@ class OipaQueryBuilder:
                 pl.PlanGUID as plan_guid,
                 pl.PlanName as plan_name
             FROM {OipaQueryBuilder.POLICY_PLAN_TABLES}
+            -- Join with AsCode table for status description
+            LEFT JOIN AsCode status_code_tbl ON status_code_tbl.CodeValue = p.StatusCode 
+                AND status_code_tbl.CodeName = 'AsCodeStatus'
+            -- Join with AsCode table for state description  
+            LEFT JOIN AsCode state_code_tbl ON state_code_tbl.CodeValue = p.IssueStateCode
+                AND state_code_tbl.CodeName = 'AsCodeState'
         """
         
         parameters = {}
@@ -464,7 +477,6 @@ class OipaQueryBuilder:
             parameters['policy_number'] = policy_number
         
         return query, parameters
-    
     @staticmethod
     def get_client_portfolio(client_guid: str) -> tuple[str, Dict[str, Any]]:
         """
@@ -494,15 +506,18 @@ class OipaQueryBuilder:
     @staticmethod
     def count_policies_by_status() -> tuple[str, Dict[str, Any]]:
         """
-        Build optimized query to count policies by status
+        Build optimized query to count policies by status including status names
         """
         query = """
             SELECT 
                 p.StatusCode as status_code,
+                status_code_tbl.ShortDescription as status_name,
                 COUNT(*) as policy_count,
                 ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER(), 2) as percentage
             FROM AsPolicy p
-            GROUP BY p.StatusCode
+            LEFT JOIN AsCode status_code_tbl ON status_code_tbl.CodeValue = p.StatusCode 
+                AND status_code_tbl.CodeName = 'AsCodeStatus'
+            GROUP BY p.StatusCode, status_code_tbl.ShortDescription
             ORDER BY policy_count DESC
         """
         

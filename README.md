@@ -9,13 +9,14 @@ MCP (Model Context Protocol) server for Oracle OIPA (Insurance Policy Administra
 - 📊 **Real-time Analytics** - Policy counts, status distributions, and business metrics  
 - 🏢 **Client Management** - Client search, portfolio views, and relationship tracking
 - ⚡ **Direct OIPA Integration** - Native Oracle database connectivity and SOAP web services
+- 🏷️ **Enhanced Data Display** - Human-readable status and state names from OIPA AsCode lookups
 
 ### Available Tools
 
 #### Policy Management
-- `oipa_search_policies` - Search policies by number, client name, or tax ID
-- `oipa_get_policy_details` - Get comprehensive policy information including segments and roles
-- `oipa_policy_counts_by_status` - Dashboard-style policy distribution overview
+- `oipa_search_policies` - Search policies by number, client name, or tax ID with human-readable status names
+- `oipa_get_policy_details` - Get comprehensive policy information including segments, roles, and descriptive state/status names
+- `oipa_policy_counts_by_status` - Dashboard-style policy distribution overview with OIPA-configured status descriptions
 
 #### Analytics & Reporting
 - Real-time policy status breakdowns
