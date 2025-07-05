@@ -15,13 +15,22 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 from oipa_mcp.config import config
 from oipa_mcp.connectors import oipa_db
 
-
 async def test_database_connection():
     """Test database connectivity and basic queries with enhanced diagnostics"""
     print("🔍 Testing OIPA Database Connection...")
-    print(f"Host: {config.database.host}")
-    print(f"Service: {config.database.service_name}")
-    print(f"Username: {config.database.username}")
+    
+    # Show different connection info based on type
+    if config.database.is_cloud_wallet:
+        print("📋 Connection Type: Oracle Cloud Wallet")
+        print(f"Wallet Location: {config.database.wallet_location}")
+        print(f"Service Name: {config.database.service_name}")
+        print(f"Username: {config.database.username}")
+    else:
+        print("📋 Connection Type: Traditional Oracle")
+        print(f"Host: {config.database.host}")
+        print(f"Service: {config.database.service_name}")
+        print(f"Username: {config.database.username}")
+    
     print(f"Pool Config: min={config.database.pool_min_size}, max={config.database.pool_max_size}")
     print()
     
@@ -40,6 +49,24 @@ async def test_database_connection():
         else:
             print("❌ Database connection test failed")
             return False
+        
+        # Test schema configuration
+        if config.database.default_schema:
+            print(f"✅ Default schema configured: {config.database.default_schema}")
+            try:
+                # Test schema access
+                schema_query = "SELECT USER, SYS_CONTEXT('USERENV', 'CURRENT_SCHEMA') FROM DUAL"
+                schema_result = await oipa_db.execute_single_query(schema_query)
+                if schema_result:
+                    print(f"✅ Current database user: {schema_result.get('user', 'N/A')}")
+                    # Get the schema value using the correct key from the result
+                    schema_key = "sys_context('userenv','current_schema')"
+                    current_schema = schema_result.get(schema_key, 'N/A')
+                    print(f"✅ Current schema: {current_schema}")
+            except Exception as e:
+                print(f"⚠️  Schema test error: {e}")
+        else:
+            print("⚠️  No default schema configured - tables might not be accessible")
         
         # Test table access
         print("\n🔍 Testing table access...")

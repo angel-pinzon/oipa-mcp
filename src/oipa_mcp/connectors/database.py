@@ -39,29 +39,12 @@ class OipaDatabase:
             return
             
         try:
-            # Try to initialize Oracle Client for thick mode (optional)
-            # If not available, oracledb will use thin mode automatically
-            try:
-                oracledb.init_oracle_client()
-                logger.info("Using Oracle Client (thick mode) for enhanced performance")
-            except Exception:
-                logger.info("Using thin mode (pure Python, no Oracle Client required)")
-            
-            # Create async connection pool (note: create_pool_async returns immediately)
-            self._pool = oracledb.create_pool_async(
-                user=self.config.database.username,
-                password=self.config.database.password,
-                dsn=self.config.database.dsn,
-                min=self.config.database.pool_min_size,
-                max=self.config.database.pool_max_size,
-                increment=1,
-                # Enhanced pool configuration
-                ping_interval=60,  # Test connections every 60 seconds
-                timeout=30,        # Connection timeout
-                retry_count=3,     # Retry on connection failures
-                retry_delay=1      # Delay between retries
-            )
-            
+            # Handle Cloud Wallet vs Traditional connection
+            if self.config.database.is_cloud_wallet:
+                await self._initialize_cloud_wallet()
+            else:
+                await self._initialize_traditional()
+                
             self._initialized = True
             logger.info(f"Async database pool initialized: {self.config.database.dsn}")
             logger.info(f"Pool configuration: min={self.config.database.pool_min_size}, max={self.config.database.pool_max_size}")
@@ -69,6 +52,93 @@ class OipaDatabase:
         except oracledb.Error as e:
             logger.error(f"Failed to initialize database pool: {e}")
             raise
+    
+    async def _initialize_cloud_wallet(self) -> None:
+        """Initialize connection using Oracle Cloud Wallet"""
+        if not self.config.database.wallet_location:
+            raise ValueError("OIPA_DB_WALLET_LOCATION is required for Cloud Wallet connection")
+        
+        logger.info("Initializing Oracle Cloud Wallet connection")
+        
+        # For Cloud Wallet, we must use thin mode (no Oracle Client)
+        logger.info("Using thin mode for Cloud Wallet (no Oracle Client required)")
+        
+        # Setup environment for auto-login wallet
+        self._setup_wallet_environment()
+        
+        # Create connection pool with Cloud Wallet configuration
+        pool_params = {
+            'user': self.config.database.username,
+            'password': self.config.database.password,
+            'dsn': self.config.database.dsn,
+            'min': self.config.database.pool_min_size,
+            'max': self.config.database.pool_max_size,
+            'increment': 1,
+            # Cloud Wallet specific configuration
+            'config_dir': self.config.database.wallet_location,
+            'wallet_location': self.config.database.wallet_location,
+            # Enhanced pool configuration
+            'ping_interval': 60,  # Test connections every 60 seconds
+            'timeout': 30,        # Connection timeout
+            'retry_count': 3,     # Retry on connection failures
+            'retry_delay': 1      # Delay between retries
+        }
+        
+        # Configure wallet usage
+        if self.config.database.wallet_password:
+            # Use encrypted wallet with password
+            pool_params['wallet_password'] = self.config.database.wallet_password
+            logger.info("Using encrypted wallet with password")
+        else:
+            # Force auto-login wallet usage (cwallet.sso)
+            logger.info("Using auto-login wallet (cwallet.sso) without password")
+        
+        self._pool = oracledb.create_pool_async(**pool_params)
+        
+        logger.info(f"Cloud Wallet connection initialized from: {self.config.database.wallet_location}")
+    
+    def _setup_wallet_environment(self) -> None:
+        """Setup environment variables for auto-login wallet"""
+        import os
+        
+        wallet_location = self.config.database.wallet_location
+        
+        # Set TNS_ADMIN to wallet location
+        os.environ['TNS_ADMIN'] = wallet_location
+        
+        # Set WALLET_LOCATION
+        os.environ['WALLET_LOCATION'] = wallet_location
+        
+        # Force use of auto-login wallet by setting ORACLE_WALLET_TYPE
+        os.environ['ORACLE_WALLET_TYPE'] = 'SSO'
+        
+        logger.info(f"Wallet environment configured for auto-login: {wallet_location}")
+    
+    async def _initialize_traditional(self) -> None:
+        """Initialize traditional Oracle connection"""
+        logger.info("Initializing traditional Oracle connection")
+        
+        # Try to initialize Oracle Client for thick mode (optional)
+        try:
+            oracledb.init_oracle_client()
+            logger.info("Using Oracle Client (thick mode) for enhanced performance")
+        except Exception:
+            logger.info("Using thin mode (pure Python, no Oracle Client required)")
+        
+        # Create async connection pool
+        self._pool = oracledb.create_pool_async(
+            user=self.config.database.username,
+            password=self.config.database.password,
+            dsn=self.config.database.dsn,
+            min=self.config.database.pool_min_size,
+            max=self.config.database.pool_max_size,
+            increment=1,
+            # Enhanced pool configuration
+            ping_interval=60,  # Test connections every 60 seconds
+            timeout=30,        # Connection timeout
+            retry_count=3,     # Retry on connection failures
+            retry_delay=1      # Delay between retries
+        )
     
     async def close(self) -> None:
         """Close the database connection pool"""
@@ -88,6 +158,19 @@ class OipaDatabase:
         try:
             # Get async connection from pool
             connection = await self._pool.acquire()
+            
+            # Set default schema if configured
+            if self.config.database.default_schema:
+                cursor = connection.cursor()
+                try:
+                    alter_session_sql = f"ALTER SESSION SET CURRENT_SCHEMA = {self.config.database.default_schema}"
+                    await cursor.execute(alter_session_sql)
+                    logger.debug(f"Set default schema to: {self.config.database.default_schema}")
+                except oracledb.Error as e:
+                    logger.warning(f"Failed to set default schema: {e}")
+                finally:
+                    cursor.close()
+            
             yield connection
         except oracledb.Error as e:
             logger.error(f"Database connection error: {e}")

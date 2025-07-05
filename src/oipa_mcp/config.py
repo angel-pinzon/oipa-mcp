@@ -23,6 +23,14 @@ class DatabaseConfig:
     username: str = field(default_factory=lambda: os.getenv("OIPA_DB_USERNAME", ""))
     password: str = field(default_factory=lambda: os.getenv("OIPA_DB_PASSWORD", ""))
     
+    # Schema settings
+    default_schema: Optional[str] = field(default_factory=lambda: os.getenv("OIPA_DB_DEFAULT_SCHEMA"))
+    
+    # Cloud Wallet settings
+    wallet_location: Optional[str] = field(default_factory=lambda: os.getenv("OIPA_DB_WALLET_LOCATION"))
+    wallet_password: Optional[str] = field(default_factory=lambda: os.getenv("OIPA_DB_WALLET_PASSWORD"))
+    connection_type: str = field(default_factory=lambda: os.getenv("OIPA_DB_CONNECTION_TYPE", "traditional"))
+    
     # Connection pool settings
     pool_min_size: int = field(default_factory=lambda: int(os.getenv("DB_POOL_MIN_SIZE", "1")))
     pool_max_size: int = field(default_factory=lambda: int(os.getenv("DB_POOL_MAX_SIZE", "10")))
@@ -31,13 +39,21 @@ class DatabaseConfig:
     @property
     def dsn(self) -> str:
         """Build Oracle DSN string"""
+        if self.connection_type == "cloud_wallet":
+            return self.service_name
         return f"{self.host}:{self.port}/{self.service_name}"
     
     @property
     def connection_string(self) -> str:
         """Build full connection string"""
+        if self.connection_type == "cloud_wallet":
+            return f"{self.username}/{self.password}@{self.service_name}"
         return f"{self.username}/{self.password}@{self.dsn}"
-
+    
+    @property
+    def is_cloud_wallet(self) -> bool:
+        """Check if using Cloud Wallet connection"""
+        return self.connection_type == "cloud_wallet"
 
 @dataclass  
 class WebServiceConfig:
@@ -130,6 +146,7 @@ class Config:
                 "service_name": self.database.service_name,
                 "username": self.database.username,
                 "password": "***" if self.database.password else None,
+                "default_schema": self.database.default_schema,
                 "dsn": self.database.dsn
             },
             "webservice": {

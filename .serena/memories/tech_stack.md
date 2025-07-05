@@ -1,4 +1,4 @@
-# OIPA MCP Server - Technology Stack (Updated)
+# OIPA MCP Server - Technology Stack (Updated July 2025)
 
 ## Core Technology Stack
 
@@ -10,7 +10,7 @@
 
 ### Database & Connectivity
 - **Oracle Database**: Direct connection to OIPA database
-- **cx-oracle**: 8.3+ Oracle database driver with connection pooling
+- **oracledb**: 2.0+ Modern Oracle database driver with connection pooling (NO Oracle Client required)
 - **Connection Pooling**: Async connection pool management
 - **Query Builder**: Custom query builder for OIPA table structure
 
@@ -50,6 +50,10 @@
 - **Environment Management**: Multi-environment support
 - **SSL/TLS Support**: Secure connections
 - **Connection Pooling**: Production-grade database pooling
+
+### Optional Components
+- **asyncio-mqtt**: MQTT support for async messaging
+- **No Oracle Client Required**: Uses modern oracledb driver
 
 ## Architecture Patterns
 
@@ -123,4 +127,10 @@
 - **Hot Reload**: Development server with auto-reload
 - **Debug Support**: Full debugging capabilities with proper logging
 
-This technology stack provides a robust, scalable, and maintainable foundation for OIPA integration while ensuring high performance and reliability.
+## Migration Notes (July 2025)
+- **MIGRATED FROM cx-oracle TO oracledb**: The project now uses the modern oracledb driver
+- **No Oracle Client Required**: Installation is now cleaner without Oracle Instant Client dependency
+- **Better Async Support**: oracledb provides superior async/await integration
+- **Official Oracle Support**: Using the officially recommended driver for new projects
+
+This technology stack provides a robust, scalable, and maintainable foundation for OIPA integration while ensuring high performance and reliability with modern Python database connectivity.
