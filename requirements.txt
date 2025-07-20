@@ -1,31 +1,64 @@
-# Core MCP and async dependencies
+# OIPA MCP Server Requirements
+# Python 3.8+ required
+
+# ====================
+# Core Dependencies
+# ====================
+
+# MCP Protocol and Server
 mcp>=1.0.0
+
+# Data validation and serialization
 pydantic>=2.0.0
+pydantic-settings>=2.0.0
+
+# Async HTTP client
 aiohttp>=3.8.0
 
-# Oracle Database connectivity (modern, no Oracle Client required)
+# ====================
+# Database
+# ====================
+
+# Oracle Database connectivity (no Oracle Client required!)
 oracledb>=2.0.0
 
-# XML processing (for AsXML and SOAP)
-lxml>=4.9.0
+# ====================
+# Configuration
+# ====================
 
-# Configuration and environment
+# Environment variable management
 python-dotenv>=1.0.0
+
+# YAML configuration support
 pyyaml>=6.0
 
-# Logging
+# ====================
+# Logging and Monitoring
+# ====================
+
+# Advanced logging with colors and rotation
 loguru>=0.7.0
 
-# Template engine (for building XML/SOAP messages)
+# ====================
+# Data Processing
+# ====================
+
+# XML processing for AsXML format
+lxml>=4.9.0
+
+# Template engine for XML/SOAP generation
 jinja2>=3.1.0
 
-# Optional: MQTT support for async messaging
-asyncio-mqtt>=0.11.0
+# Date/time handling
+python-dateutil>=2.8.0
 
-# Development dependencies (optional)
-pytest>=7.0.0
-pytest-asyncio>=0.21.0
-pytest-mock>=3.10.0
-black>=23.0.0
-ruff>=0.1.0
-mypy>=1.5.0
+# ====================
+# Optional Features
+# ====================
+
+# MQTT support for Push Framework integration
+# asyncio-mqtt>=0.11.0
+
+# Redis for caching (if enabled)
+# redis>=4.5.0
+# aioredis>=2.0.0
