@@ -1,1 +1,0 @@
-'{ "mcpServers": { "oipa-mcp": { "command": "python", "args": ["-m", "oipa_mcp.server"], "cwd": "C:\\\\Tmp\\\\ML\\\\mcp-oipa\\\\oipa-mcp", "env": { "OIPA_DB_HOST": "192.168.1.50", "OIPA_DB_PORT": "1521", "OIPA_DB_SERVICE_NAME": "oipadev", "OIPA_DB_USERNAME": "oipa", "OIPA_DB_PASSWORD": "your_password_here", "LOG_LEVEL": "INFO", "LOG_FORMAT": "text" } } } }' 

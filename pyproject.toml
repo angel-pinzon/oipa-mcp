@@ -58,10 +58,10 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/your-org/oipa-mcp"
-Documentation = "https://github.com/your-org/oipa-mcp/docs"
-Repository = "https://github.com/your-org/oipa-mcp.git"
-Issues = "https://github.com/your-org/oipa-mcp/issues"
+Homepage = "https://github.com/yourusername/oipa-mcp-server"
+Documentation = "https://github.com/yourusername/oipa-mcp-server/wiki"
+Repository = "https://github.com/yourusername/oipa-mcp-server.git"
+Issues = "https://github.com/yourusername/oipa-mcp-server/issues"
 
 [project.scripts]
 oipa-mcp = "oipa_mcp.server:main"
