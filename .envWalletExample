@@ -1,11 +1,11 @@
 # OIPA Database Configuration (Basado en tu conexión local)
 
-OIPA_DB_USERNAME=EQ_SPINZON
-OIPA_DB_PASSWORD=1Q2w3e4r5t*1234567
+OIPA_DB_USERNAME=XXXX
+OIPA_DB_PASSWORD=XXXX
 
 
 # For Oracle Cloud Wallet connection (set CONNECTION_TYPE=cloud_wallet)
-OIPA_DB_WALLET_LOCATION=C:\Tmp\gnp\Sbox\wallet_autologin
+OIPA_DB_WALLET_LOCATION=C:\Tmp\xx\xx\wallet_autologin
 # OIPA_DB_WALLET_PASSWORD=not_required_for_this_wallet
 OIPA_DB_SERVICE_NAME=vitalnprod_high
 OIPA_DB_CONNECTION_TYPE=cloud_wallet

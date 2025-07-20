@@ -1,428 +1,442 @@
 # OIPA MCP Server
 
-MCP (Model Context Protocol) server for Oracle OIPA (Insurance Policy Administration) integration.
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![MCP Compatible](https://img.shields.io/badge/MCP-Compatible-green.svg)](https://modelcontextprotocol.io)
 
-## Features
+A Model Context Protocol (MCP) server that enables AI assistants to interact with Oracle OIPA (Insurance Policy Administration) systems using natural language.
+
+## 🌟 What is this?
+
+This project provides a bridge between AI assistants (like Claude) and Oracle OIPA insurance systems. It allows you to:
+
+- Search insurance policies using natural language
+- Get detailed policy information with a simple query
+- View real-time analytics and dashboards
+- Execute OIPA transactions through conversational interfaces
+
+No more complex SQL queries or navigating through multiple OIPA screens - just ask in plain language!
+
+## 🚀 Features
 
 ### Core Capabilities
-- 🔍 **Intelligent Policy Search** - Natural language search across policies, clients, and products
-- 📊 **Real-time Analytics** - Policy counts, status distributions, and business metrics  
-- 🏢 **Client Management** - Client search, portfolio views, and relationship tracking
-- ⚡ **Direct OIPA Integration** - Native Oracle database connectivity and SOAP web services
-- 🏷️ **Enhanced Data Display** - Human-readable status and state names from OIPA AsCode lookups
+- **🔍 Natural Language Policy Search** - Search by policy number, client name, tax ID, or status
+- **📋 Comprehensive Policy Details** - View complete policy information including clients, plans, and coverage
+- **📊 Real-time Analytics** - Instant dashboards showing policy distributions and metrics
+- **🔗 Direct OIPA Integration** - Native connection to OIPA database with no intermediaries
+- **⚡ High Performance** - Async architecture with connection pooling for fast responses
 
 ### Available Tools
 
-#### Policy Management
-- `oipa_search_policies` - Search policies by number, client name, or tax ID with human-readable status names
-- `oipa_get_policy_details` - Get comprehensive policy information including segments, roles, and descriptive state/status names
-- `oipa_policy_counts_by_status` - Dashboard-style policy distribution overview with OIPA-configured status descriptions
+| Tool | Description | Example Query |
+|------|-------------|---------------|
+| `oipa_search_policies` | Search policies with intelligent filtering | "Find all active policies for John Smith" |
+| `oipa_get_policy_details` | Get comprehensive policy information | "Show me details for policy VG01-002-561-000001063" |
+| `oipa_policy_counts_by_status` | View policy distribution analytics | "How many policies do we have by status?" |
 
-#### Analytics & Reporting
-- Real-time policy status breakdowns
-- Client portfolio summaries
-- Transaction history analysis
+## 📋 Prerequisites
 
-## Quick Start
+- Python 3.8 or higher
+- Access to an Oracle OIPA database
+- MCP-compatible client (e.g., Claude Desktop, custom MCP client)
 
-### Prerequisites
-- Python 3.8+
-- Oracle Database access to OIPA
-- OIPA FileReceived Web Service access
+## 🛠️ Installation
 
-### Installation
+### 1. Clone the Repository
 
 ```bash
-# Clone the repository
-git clone https://github.com/your-org/oipa-mcp.git
-cd oipa-mcp
+git clone https://github.com/yourusername/oipa-mcp-server.git
+cd oipa-mcp-server
+```
 
-# Install dependencies (uses modern oracledb - no Oracle Client required!)
+### 2. Create Virtual Environment (Recommended)
+
+```bash
+# Windows
+python -m venv venv
+venv\Scripts\activate
+
+# Linux/Mac
+python -m venv venv
+source venv/bin/activate
+```
+
+### 3. Install Dependencies
+
+```bash
 pip install -r requirements.txt
-# Copy and configure environment
+```
+
+> **Note**: This project uses the modern `oracledb` library which doesn't require Oracle Client installation!
+
+### 4. Configure Environment
+
+```bash
+# Copy the example configuration
 cp .env.example .env
+
 # Edit .env with your OIPA connection details
 ```
 
-### Configuration
+## ⚙️ Configuration
 
-Edit `.env` file with your OIPA environment details:
+### Basic Configuration (.env file)
 
 ```bash
-# OIPA Database
-OIPA_DB_HOST=your-oipa-host
+# OIPA Database Connection
+OIPA_DB_HOST=your-oipa-host.com
+OIPA_DB_PORT=1521
 OIPA_DB_SERVICE_NAME=OIPA
-OIPA_DB_USERNAME=your-username
-OIPA_DB_PASSWORD=your-password
+OIPA_DB_USERNAME=your_username
+OIPA_DB_PASSWORD=your_password
 
-# OIPA Web Service
-OIPA_WS_ENDPOINT=http://your-oipa-server:8080/pas/services/FileReceived
-OIPA_WS_USERNAME=webservice-user
-OIPA_WS_PASSWORD=webservice-password
+# Optional: Default Schema (if different from username)
+OIPA_DB_DEFAULT_SCHEMA=OIPA_SCHEMA
+
+# Connection Pool Settings
+DB_POOL_MIN_SIZE=1
+DB_POOL_MAX_SIZE=5
+
+# Logging
+LOG_LEVEL=INFO
 ```
 
-### Running the Server
+### Oracle Cloud Wallet Configuration
+
+If using Oracle Autonomous Database or Cloud:
+
+```bash
+# Connection Type
+OIPA_DB_CONNECTION_TYPE=cloud_wallet
+
+# Wallet Configuration
+OIPA_DB_WALLET_LOCATION=/path/to/wallet
+OIPA_DB_SERVICE_NAME=oipa_high
+
+# Optional: Wallet Password (for encrypted wallets)
+OIPA_DB_WALLET_PASSWORD=wallet_password
+```
+
+## 🏃‍♂️ Running the Server
+
+### Quick Start
 
 ```bash
 # Run the MCP server
 python -m oipa_mcp.server
-
-# Or using the installed command
-oipa-mcp
 ```
 
-## Usage Examples
+### Testing Connection
 
-### Searching Policies
+```bash
+# Verify OIPA database connectivity
+python scripts/test_connection.py
+```
+
+### Integration with Claude Desktop
+
+Add to your Claude Desktop configuration (`claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "oipa": {
+      "command": "python",
+      "args": ["-m", "oipa_mcp.server"],
+      "cwd": "/path/to/oipa-mcp-server",
+      "env": {
+        "PYTHONPATH": "/path/to/oipa-mcp-server"
+      }
+    }
+  }
+}
+```
+
+## 💬 Usage Examples
+
+### Policy Search
 ```
 User: "Find policies for María García"
-MCP: Found 3 results:
-1. VG01-002-561-000001063 - María García Rodríguez (Active)
-2. VG01-002-561-000001128 - María García López (Active)  
-3. VG01-002-561-000000987 - María García Sánchez (Cancelled)
+Assistant: I found 3 policies for María García:
+
+1. **VG01-002-561-000001063** - María García Rodríguez
+   - Status: Active
+   - Plan: Vida Universal
+   - Created: 2023-01-15
+
+2. **VG01-002-561-000001128** - María García López
+   - Status: Active
+   - Plan: Seguro Temporal
+   - Created: 2023-03-20
+
+3. **VG01-002-561-000000987** - María García Sánchez
+   - Status: Cancelled
+   - Plan: Vida Entera
+   - Created: 2022-11-10
 ```
 
 ### Policy Details
 ```
-User: "Get details for policy VG01-002-561-000001063"
-MCP: Policy Number: VG01-002-561-000001063
-Policy Name: Seguro de Vida Individual
-Status: Active
-Primary Client: María García Rodríguez
-Tax ID: GARM850101ABC
-Plan: Vida Universal
-Creation Date: 2023-01-15
+User: "Show me details for policy VG01-002-561-000001063"
+Assistant: Here are the details for policy VG01-002-561-000001063:
+
+**Policy Information**
+- Policy Number: VG01-002-561-000001063
+- Policy Name: Seguro de Vida Individual
+- Status: Active
+- Creation Date: 2023-01-15
+
+**Primary Insured**
+- Name: María García Rodríguez
+- Tax ID: GARM850101ABC
+- Birth Date: 1985-01-01
+- Gender: Female
+
+**Plan Details**
+- Plan Name: Vida Universal
+- Plan Code: VU-001
+- Coverage Amount: $1,000,000 MXN
 ```
 
 ### Analytics Dashboard
 ```
 User: "How many policies do we have by status?"
-MCP: Total 15,847 policies across 4 statuses
-Active: 14,203 (89.6%)
-Pending: 1,234 (7.8%)
-Cancelled: 380 (2.4%)
-Suspended: 30 (0.2%)
+Assistant: Here's the current policy distribution:
+
+📊 **Total Policies: 15,847**
+
+- ✅ Active: 14,203 (89.6%)
+- ⏳ Pending: 1,234 (7.8%)
+- ❌ Cancelled: 380 (2.4%)
+- ⚠️ Suspended: 30 (0.2%)
 ```
 
-## Architecture
+## 🏗️ Architecture
 
-### Components
+### System Architecture
+
 ```
-src/oipa_mcp/
-├── server.py           # Main MCP server
-├── config.py           # Configuration management
-├── connectors/         # OIPA integration layer
-│   ├── database.py     # Oracle database connector
-│   ├── web_service.py  # FileReceived SOAP client
-│   └── push_framework.py # Push framework integration
-└── tools/              # MCP tools implementation
-    ├── policy_tools.py # Policy management tools
-    ├── client_tools.py # Client management tools
-    └── analytics_tools.py # Analytics and reporting
-```
-
-### Integration Methods
-
-1. **Direct Database Access** - Fast queries for read operations
-2. **FileReceived Web Service** - Transaction execution and data updates
-3. **Push Framework** - Async messaging and notifications
-
-## Development
-
-### Adding New Tools
-
-1. Create tool class inheriting from `BaseTool`:
-
-```python
-from .base import QueryTool
-
-class MyNewTool(QueryTool):
-    @property
-    def name(self) -> str:
-        return "oipa_my_new_tool"
-    
-    @property
-    def description(self) -> str:
-        return "Description of what this tool does"
-    
-    @property
-    def input_schema(self) -> Dict[str, Any]:
-        return {
-            "type": "object",
-            "properties": {
-                "param1": {"type": "string", "description": "Parameter description"}
-            },
-            "required": ["param1"]
-        }
-    
-    async def _execute_impl(self, arguments: Dict[str, Any]) -> Any:
-        # Implement tool logic
-        return {"result": "success"}
+┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
+│   AI Assistant  │────▶│  OIPA MCP Server │────▶│   Oracle OIPA   │
+│    (Claude)     │◀────│                  │◀────│    Database     │
+└─────────────────┘     └──────────────────┘     └─────────────────┘
+         │                       │                         │
+         │                       ├── Policy Tools         │
+         │                       ├── Client Tools         │
+         │                       └── Analytics Tools      │
+         │                                                │
+         └────────── Natural Language ────────────────────┘
 ```
 
-2. Register in `tools/__init__.py`:
+### Project Structure
 
-```python
-from .my_module import MyNewTool
-
-AVAILABLE_TOOLS = [
-    # existing tools...
-    MyNewTool()
-]
+```
+oipa-mcp-server/
+├── src/oipa_mcp/
+│   ├── server.py           # Main MCP server implementation
+│   ├── config.py           # Configuration management
+│   ├── connectors/         # OIPA integration layer
+│   │   ├── database.py     # Oracle database connector
+│   │   └── query_builder.py # SQL query construction
+│   └── tools/              # MCP tool implementations
+│       ├── base.py         # Base tool classes
+│       └── policy_tools.py # Policy management tools
+├── scripts/
+│   └── test_connection.py  # Database connectivity test
+├── tests/                  # Unit and integration tests
+├── .env.example           # Example configuration
+└── requirements.txt       # Python dependencies
 ```
 
-### Testing
+## 🧪 Development
+
+### Setting Up Development Environment
 
 ```bash
+# Install development dependencies
+pip install -r requirements-dev.txt
+
 # Run tests
-pytest tests/
+pytest tests/ -v
 
 # Run with coverage
 pytest tests/ --cov=src/oipa_mcp --cov-report=html
 
-# Test specific component
-pytest tests/test_policy_tools.py -v
-```
-
-### Code Quality
-
-```bash
-# Format code
+# Code formatting
 black src/ tests/
 
-# Lint code  
+# Linting
 ruff check src/ tests/
 
 # Type checking
 mypy src/oipa_mcp/
 ```
 
-## OIPA Integration Details
+### Adding New Tools
 
-### Supported OIPA Tables
-- `AsPolicy` - Policy master data
-- `AsClient` - Client/insured information
-- `AsRole` - Policy-client relationships
-- `AsActivity` - Transaction history
-- `AsSegment` - Policy segments/coverages
-- `AsPlan` - Product/plan definitions
+1. Create a new tool class in `src/oipa_mcp/tools/`:
 
-### Supported Transactions
-Based on documented OIPA transaction examples:
-- `INTPrintAvisoCobro` - Print billing notices
-- `INTPrintCertificado` - Print certificates
-- `INTPrintConsentimiento` - Print consent forms
+```python
+from typing import Any, Dict
+from .base import QueryTool
 
-### AsXML Support
-Full support for OIPA's AsXML format for data exchange:
-```xml
-<AsXml>
-  <AsPolicy>
-    <PolicyGuid>6CCA0B15-EFAC-471F-A698-27949AB9B9C4</PolicyGuid>
-    <PolicyNumber>VG01-002-561-000001063</PolicyNumber>
-    <PolicyName>Seguro de Vida Individual</PolicyName>
-    <!-- ... -->
-  </AsPolicy>
-</AsXml>
+class MyNewTool(QueryTool):
+    """Description of what your tool does"""
+    
+    @property
+    def name(self) -> str:
+        return "oipa_my_new_tool"
+    
+    @property
+    def description(self) -> str:
+        return """
+        Detailed description of your tool's functionality.
+        Include examples of how to use it.
+        """
+    
+    @property
+    def input_schema(self) -> Dict[str, Any]:
+        return {
+            "type": "object",
+            "properties": {
+                "param1": {
+                    "type": "string",
+                    "description": "Description of parameter"
+                }
+            },
+            "required": ["param1"]
+        }
+    
+    async def _execute_impl(self, arguments: Dict[str, Any]) -> Any:
+        # Implement your tool logic here
+        param1 = arguments["param1"]
+        
+        # Use query builder for database operations
+        query, params = OipaQueryBuilder.your_query_method(param1)
+        results = await self._execute_query(query, params)
+        
+        return results
 ```
 
-## Deployment
+2. Register the tool in `src/oipa_mcp/tools/__init__.py`:
 
-### Production Configuration
+```python
+from .my_new_tool import MyNewTool
 
-```bash
-# Production environment variables
-LOG_LEVEL=INFO
-LOG_FORMAT=json
-LOG_FILE=/var/log/oipa-mcp/server.log
-
-# Database connection pooling
-DB_POOL_MIN_SIZE=5
-DB_POOL_MAX_SIZE=20
-DB_POOL_TIMEOUT=30
-
-# Performance tuning
-CACHE_TTL=300
-MAX_QUERY_RESULTS=1000
-QUERY_TIMEOUT=30
+AVAILABLE_TOOLS = [
+    # ... existing tools
+    MyNewTool()
+]
 ```
 
-### Docker Deployment
-
-```dockerfile
-FROM python:3.11-slim
-
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-
-COPY src/ ./src/
-COPY config/ ./config/
-
-EXPOSE 8080
-CMD ["python", "-m", "oipa_mcp.server"]
-```
-
-### Monitoring
-
-The server includes built-in logging and monitoring:
-- Structured JSON logging
-- Database connection health checks
-- Tool execution metrics
-- Error tracking and alerting
-
-## Database Migration (cx_Oracle → oracledb)
-
-🚀 **New in this version**: We've migrated from `cx_Oracle` to the modern `oracledb` library for improved performance and simplified installation.
-
-### Migration Benefits
-
-- ✅ **No Oracle Client Required** - Pure Python implementation
-- ✅ **Simplified Installation** - Single `pip install` command  
-- ✅ **Better Performance** - Optimized async connection pooling
-- ✅ **Enhanced Error Handling** - Improved diagnostics and logging
-- ✅ **Cross-Platform** - Works consistently across OS platforms
-
-### Automatic Migration
-
-For existing installations, run the migration script:
-
-```bash
-# Run automated migration
-python scripts/migrate_to_oracledb.py
-
-# Test the migration
-python scripts/test_connection.py
-```
-
-### Manual Migration Steps
-
-If you prefer manual migration:
-
-```bash
-# 1. Uninstall old dependency
-pip uninstall cx_Oracle
-
-# 2. Install new dependency  
-pip install oracledb>=2.0.0
-
-# 3. Update requirements.txt (if exists)
-sed -i 's/cx-oracle>=8.3.0/oracledb>=2.0.0/g' requirements.txt
-
-# 4. Test connection
-python scripts/test_connection.py
-```
-
-### Configuration Compatibility
-
-Your existing `.env` configuration remains the same:
-- Same connection parameters
-- Same database credentials
-- Same performance settings
-
-The migration is **backward compatible** - no configuration changes needed!
-
-### Performance Improvements
-
-After migration, you'll benefit from:
-- Faster connection establishment
-- Better memory usage
-- Enhanced async performance
-- Improved error reporting
-- Optional thick mode for maximum performance
-
-
-## Troubleshooting
+## 🐛 Troubleshooting
 
 ### Common Issues
 
-1. **Database Connection Failures**
-   ```bash
-   # Test Oracle connectivity
-   python scripts/test_connection.py
-   
-   # Check TNS configuration
-   echo $TNS_ADMIN
-   tnsping OIPA
-   ```
+#### Database Connection Failed
 
-2. **SOAP Web Service Errors**
-   ```bash
-   # Test FileReceived endpoint
-   curl -X POST $OIPA_WS_ENDPOINT \
-     -H "Content-Type: text/xml" \
-     -d @test_message.xml
-   ```
+```bash
+# Check your connection settings
+python scripts/test_connection.py
 
-3. **Tool Execution Timeouts**
-   ```bash
-   # Increase query timeout
-   export QUERY_TIMEOUT=60
-   
-   # Enable query debugging
-   export LOG_LEVEL=DEBUG
-   ```
+# Verify environment variables
+python -c "from oipa_mcp.config import config; print(config.database.dsn)"
+```
 
-### Debugging
+#### Oracle Client Not Found
+
+This project uses `oracledb` in thin mode - no Oracle Client needed! If you see this error, ensure you're using the latest version:
+
+```bash
+pip install --upgrade oracledb
+```
+
+#### Permission Denied on OIPA Tables
+
+Ensure your database user has SELECT permissions on these OIPA tables:
+- AsPolicy
+- AsClient
+- AsRole
+- AsSegment
+- AsPlan
+- AsCode
+
+### Debug Mode
 
 Enable debug logging for detailed troubleshooting:
 
 ```bash
+# Set debug logging
 export LOG_LEVEL=DEBUG
+
+# Run with debug output
 python -m oipa_mcp.server
 ```
 
-## Contributing
+## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+We welcome contributions! Here's how you can help:
 
-### Guidelines
-- Follow existing code style (Black formatting)
+1. **Fork the repository**
+2. **Create a feature branch**: `git checkout -b feature/amazing-feature`
+3. **Make your changes**
+4. **Run tests**: `pytest tests/`
+5. **Commit**: `git commit -m 'Add amazing feature'`
+6. **Push**: `git push origin feature/amazing-feature`
+7. **Open a Pull Request**
+
+### Contribution Guidelines
+
+- Follow PEP 8 and use Black for formatting
 - Add tests for new functionality
-- Update documentation for new tools
-- Ensure all tests pass before submitting
+- Update documentation for API changes
+- Keep commits focused and atomic
+- Write clear commit messages
 
-## Roadmap
+## 📈 Roadmap
 
-### Phase 1 ✅ (Current)
-- [x] Core MCP server infrastructure
-- [x] Oracle database connectivity
-- [x] Basic policy search and details
-- [x] Status analytics
+### Current Release (v1.0) ✅
+- Core MCP server infrastructure
+- Basic policy search and details
+- Real-time analytics
+- Oracle database integration
 
-### Phase 2 🚧 (In Progress)
-- [ ] Client management tools
-- [ ] FileReceived web service integration
-- [ ] Transaction execution support
-- [ ] Enhanced search with fuzzy matching
+### Next Release (v1.1) 🚧
+- Client portfolio management
+- Transaction history search
+- Advanced filtering options
+- Performance optimizations
 
-### Phase 3 📋 (Planned)
-- [ ] Push framework integration
-- [ ] Advanced analytics and ML insights
-- [ ] Workflow automation tools
-- [ ] Real-time notifications
+### Future Plans (v2.0) 📋
+- OIPA Web Service integration
+- Transaction execution capabilities
+- Batch operations support
+- Multi-language support
 
-### Phase 4 🔮 (Future)
-- [ ] External data integration
-- [ ] Predictive analytics
-- [ ] Automated underwriting support
-- [ ] Full workflow orchestration
+### Long Term Vision 🔮
+- AI-powered insights
+- Predictive analytics
+- Workflow automation
+- Custom reporting tools
 
-## License
+## 📄 License
 
-MIT License - see [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Support
+## 🙏 Acknowledgments
 
-- 📧 Email: oipa-mcp@company.com
-- 📖 Documentation: [GitHub Wiki](https://github.com/your-org/oipa-mcp/wiki)
-- 🐛 Issues: [GitHub Issues](https://github.com/your-org/oipa-mcp/issues)
-- 💬 Discussions: [GitHub Discussions](https://github.com/your-org/oipa-mcp/discussions)
+- Oracle OIPA development team for the comprehensive insurance platform
+- Anthropic for the MCP specification and Claude AI
+- The open-source community for invaluable tools and libraries
+
+## 📞 Support
+
+- **Documentation**: [Wiki](https://github.com/yourusername/oipa-mcp-server/wiki)
+- **Issues**: [GitHub Issues](https://github.com/yourusername/oipa-mcp-server/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/yourusername/oipa-mcp-server/discussions)
 
 ---
 
-**Built with ❤️ for the Insurance Technology Community**
+**Made with ❤️ for the Insurance Technology Community**
+
+*Disclaimer: This is an independent project and is not officially affiliated with or endorsed by Oracle Corporation.*
